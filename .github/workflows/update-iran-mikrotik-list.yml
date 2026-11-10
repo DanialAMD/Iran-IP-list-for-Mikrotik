@@ -1,0 +1,33 @@
+name: Update Iran MikroTik List
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 2 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Build iran-list.rsc
+        run: |
+          chmod +x ./build-iran-list.sh
+          ./build-iran-list.sh > iran-list.rsc
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add iran-list.rsc
+          git diff --cached --quiet || git commit -m "Update iran-list.rsc"
+          git push
